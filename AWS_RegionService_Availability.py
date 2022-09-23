@@ -15,41 +15,42 @@ def handler(event, context):
 
     #start creating a lookup of services for each region
     source = requests.get(url).json()
-    s = source['prices']
+    source_to_df = source['prices']
+    df = json_normalize(source_to_df)   #creating a pandas dataframe to work with the data
+    df.drop(['attributes.aws:serviceUrl','id'], axis=1, inplace=True)   #dropping unwanted columns in pandas
+    df.rename(columns = {'attributes.aws:region':'region', 'attributes.aws:serviceName':'service'}, inplace = True) #renaming some columns in pandas
 
-    df = json_normalize(s)
-    df.head()
+    #create a list of all the different regions from the given pandas dataframe
+    list_of_regions = df.region.unique()
+    list_of_regions = list_of_regions.tolist()
 
-    df.drop(['attributes.aws:serviceUrl','id'], axis=1, inplace=True)
+    #find all the available services for each region and put it into a dictionary called 'services_for_each_region' with region names as keys and a list of services as values
+    services_for_each_region = {}
+    for region in list_of_regions:
+        if region not in services_for_each_region:
+            services_for_each_region[region] = set()
+        
+        servicesinregion = df[df['region'] == region]['service'].tolist()
 
-    df.rename(columns = {'attributes.aws:region':'region', 'attributes.aws:serviceName':'service'}, inplace = True)
-
-    rlist = df.region.unique()
-    rlist = rlist.tolist()
-
-    regionmapping = {}
-    for r in rlist:
-        if r not in regionmapping:
-            regionmapping[r] = set()
-        servicesinregion = df[df['region'] == r]['service'].tolist()
-        for s in servicesinregion:
-            regionmapping[r].add(s)
+        for service in servicesinregion:
+            services_for_each_region[region].add(service)
      
     
-    #start parsing input json for list of services and map if all services are available in a particular region
-    selected_services = json.loads(event['body'])
+    #start parsing input json for list of services to find
+    services_to_find = json.loads(event['body'])
 
-    avail_regions = {}
-    for key, val in regionmapping.items():
+    #create new dictionary are_services_available that contains regions as keys and a boolean as values that shows whether all the services are available in a particular region
+    are_services_available = {}
+    for key, val in services_for_each_region.items():
         available = True
-        for serv in selected_services:
-            if serv not in val:
+        for service in services_to_find:
+            if service not in val:
                 available = False
-        avail_regions[key] = available
+        are_services_available[key] = available
 
     response = {
         'statusCode': 200,
-        'body': json.dumps({ 'result': avail_regions })
+        'body': json.dumps({ 'result': are_services_available })
     }
 
     return response
