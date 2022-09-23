@@ -10,7 +10,8 @@ def handler(event, context):
 
     """
     First we create a lookup table of services per region using an external API. Then we parse the input json to see which services are available 
-    in each given region, and return a response that consists of the 2 lists available and not_available that has .
+    in each given region, and return a response that consists of the 2 lists: "available" and "not_available", that have a list of available services and
+    unavailable services respectively for each region.
 
     """
 
@@ -37,15 +38,15 @@ def handler(event, context):
             services_for_each_region[region].add(service)
      
     
-    #start parsing input json for list of services to find
+    #start parsing input json for list of services to find and list of regions to search
     services_to_find = json.loads(event['services_query'])
     regions_to_query = json.loads(event['regions_query'])
 
-    #create new dictionary are_services_available that contains regions as keys and a boolean as values that shows whether all the services are available in a particular region
+    #create new dictionary "availability" that contains regions as keys
     availability = {}
 
     for region in regions_to_query:
-        
+
         availability[region] = {'available': [], 'not_available': []}
         services_available = services_for_each_region[region]
 
@@ -61,6 +62,8 @@ def handler(event, context):
     }
 
     return response
+
+
 
 demo_input = { 
     "statusCode": 200,
