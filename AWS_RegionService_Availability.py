@@ -55,14 +55,19 @@ def handler(event, context):
 
     return response
 
-#demo = { 
+#demo_input = { 
 #    "statusCode": 200,
 #    "body" : '["AWS CloudFormation", "AWS Batch"]'
 #}       
 #c = []
-#demo = json.dumps(demo)
-#p = handler(json.loads(demo), c)
+#demo_input = json.dumps(demo_input)
+#p = handler(json.loads(demo_input), c)
 #print(p)
             
-
+#Output format:
+#{'statusCode': 200, 'body': '{"result": {"ap-east-1": true, "ap-northeast-1": true, "ap-northeast-2": true, "ap-south-1": true, 
+# "ap-southeast-2": true, "ca-central-1": true, "eu-west-2": true, "eu-west-3": true, "us-east-1": true, "us-east-2": true, 
+# "ap-southeast-1": true, "eu-central-1": true, "eu-north-1": true, "eu-west-1": true, "us-gov-west-1": true, "us-west-1": true, 
+# "us-west-2": true, "af-south-1": true, "ap-northeast-3": true, "cn-north-1": true, "sa-east-1": true, "ap-southeast-3": true, 
+# "eu-south-1": true, "me-central-1": false, "me-south-1": true, "cn-northwest-1": true, "us-gov-east-1": true}}'}
 
